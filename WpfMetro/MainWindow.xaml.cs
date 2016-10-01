@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Threading;
+using System.ComponentModel;
 
 namespace WpfMetro
 {
@@ -26,6 +27,14 @@ namespace WpfMetro
         public MainWindow()
         {
             InitializeComponent();
+            bgWorker.WorkerReportsProgress = true;
+            bgWorker.WorkerSupportsCancellation = true;
+            //执行任务代码
+            bgWorker.DoWork += DoWork_Handler;
+            //执行过程触发
+            bgWorker.ProgressChanged += ProgressChanged_Handler;
+            //执行结束，或有异常结束触发
+            bgWorker.RunWorkerCompleted += RunWorkerCompleted_Handler;
         }
 
         private bool mouseDown;
@@ -33,6 +42,9 @@ namespace WpfMetro
         private Core CalculateCore;
         private int calmode = -1;
         System.Collections.ObjectModel.ObservableCollection<Member> memberData;
+        BackgroundWorker bgWorker = new BackgroundWorker();
+        string[] pathresult;
+        int speed = 0;
 
 
         private void IMG1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -163,37 +175,75 @@ namespace WpfMetro
 
 
         }
-        private void Paint(object o)
+
+        private async void ProgressChanged_Handler(object sender, ProgressChangedEventArgs args)
         {
-            string temp=(string)o;
-            string[] s = temp.Split('\n');
-            foreach (string line in s)
+            //在过程改变事件中可以修改UI内容
+            string line = pathresult[args.ProgressPercentage];
+            string[] linesplit = line.Split(' ');
+            if (linesplit.Length == 1)
             {
-                string[] linesplit = line.Split(' ');
-                if (line.Equals(""))
-                    continue;
-                if (linesplit.Length == 1)
+                string xaml1 = System.Windows.Markup.XamlWriter.Save(sta);
+                Rectangle station1 = System.Windows.Markup.XamlReader.Parse(xaml1) as Rectangle;
+                station1.SetValue(Canvas.LeftProperty, CalculateCore.StaCollection[linesplit[0]].position.Item1 - 5.00);
+                station1.SetValue(Canvas.TopProperty, CalculateCore.StaCollection[linesplit[0]].position.Item2 - 24.00);
+                IMG1.Children.Add(station1);
+            }
+            else if (linesplit.Length == 2)
+            {
+                string xaml2 = System.Windows.Markup.XamlWriter.Save(transsta);
+                Rectangle station2 = System.Windows.Markup.XamlReader.Parse(xaml2) as Rectangle;
+                station2.SetValue(Canvas.LeftProperty, CalculateCore.StaCollection[linesplit[0]].position.Item1 - 9.00);
+                station2.SetValue(Canvas.TopProperty, CalculateCore.StaCollection[linesplit[0]].position.Item2 - 9.00);
+                IMG1.Children.Add(station2);
+            }
+            else
+            {
+                await this.ShowMessageAsync("出错啦!", "呀计算模块好像出了问题");
+            }
+        }
+        private void DoWork_Handler(object sender, DoWorkEventArgs args)
+        {
+            //在DoWork中修改UI同样会抛出异常
+            //label.Content = "DoWork方法执行完成";
+            BackgroundWorker worker = sender as BackgroundWorker;
+            string[] s = args.Argument.ToString().Split('\n');
+            for(int i=1;i<s.Length;i++)
+            {
+                string line = s[i];
+                if (worker.CancellationPending)
                 {
-                    Rectangle r = new Rectangle();
-                    r.OpacityMask.
-                    r.SetValue(Canvas.LeftProperty, 1.0);
-                    r.SetValue(Canvas.TopProperty, 1.0);
-
-                }
-                else if (linesplit.Length == 2)
-                {
-
+                    args.Cancel = true;
+                    break;
                 }
                 else
                 {
-                    //await this.ShowMessageAsync("出错啦!", "呀计算模块好像出了问题");
+                    string[] linesplit = line.Split(' ');
+                    if (line.Equals(""))
+                        continue;
+                    worker.ReportProgress(i);
+                    int n = int.Parse(s[0]);
+                    Thread.Sleep(n);
                 }
-                dataGrid.DataContext = memberData;
             }
-
         }
+        private async void RunWorkerCompleted_Handler(object sender, RunWorkerCompletedEventArgs args)
+        {
+
+            if (args.Cancelled)
+            {
+                await this.ShowMessageAsync("新消息!", "动画展示被用户取消");
+            }
+            else
+            {
+                await this.ShowMessageAsync("新消息!", "动画结束");
+            }
+        }
+
+    
         private async void handleResult(Tuple<string, int> result)
         {
+            pathresult = result.Item1.Split('\n');
             string[] s = result.Item1.Split('\n');
             if (result.Item2 == 0)
             {
@@ -202,27 +252,17 @@ namespace WpfMetro
             }
             //删除之前的控件
             IEnumerable<Rectangle> query1 = IMG1.Children.OfType<Rectangle>();
-            foreach (Rectangle r in query1)
+            for(int i=0;i<query1.Count();i++)
             {
-                IMG1.Children.Remove(r);
+                
             }
-            Thread paint = new Thread(Paint);
-            paint.Start(result.Item1);
+            IMG1.Children.Clear();
+            IMG1.Children.Add(IMG2);
 
-
-            Button b1 = new Button();
-            b1.SetValue(Canvas.LeftProperty, 1.0);
-            b1.SetValue(Canvas.TopProperty, 1.0);
-            //b1.RenderTransform =IMG.FindResource("Imageview");
-            Button b2 = new Button();
-            b1.SetValue(Canvas.LeftProperty, 400.0);
-            b1.SetValue(Canvas.TopProperty, 400.0);
-            List<Button> list = new List<Button>();
-            list.Add(b1);
-            list.Add(b2);
-
-            IMG1.Children.Add(b1);
-            IMG1.Children.Add(b2);
+            if (!bgWorker.IsBusy&&visual.IsChecked.Value)
+            {
+                bgWorker.RunWorkerAsync(speed.ToString()+result.Item1);
+            }
 
             labelLen.Content = Convert.ToString(result.Item2);
             foreach (string line in s)
@@ -285,6 +325,14 @@ namespace WpfMetro
             memberData.Clear();
             dataGrid.DataContext = memberData;
             labelLen.Content = "0";
+            bgWorker.CancelAsync();
+            IMG1.Children.Clear();
+            IMG1.Children.Add(IMG2);
+        }
+
+        private void slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            speed = (101 - (int)e.NewValue) * 20;
         }
     }
     public class Member

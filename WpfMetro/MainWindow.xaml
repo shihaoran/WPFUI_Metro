@@ -36,9 +36,14 @@
                 <Canvas x:Name="IMG1" RenderTransform="{StaticResource Imageview}">
                     <Image x:Name="IMG2" Source="/Resources/地铁图.gif"   />
                     <Button x:Name="button" Content="Button" Canvas.Left="466" Canvas.Top="330" Width="60" />
-                    <Rectangle Fill="#FFE72520" Height="30" Canvas.Left="652"  Canvas.Top="459" Width="22"  >
+                    <Rectangle x:Name="sta" Fill="#FFE72520" Height="30" Canvas.Left="689"  Canvas.Top="413" Width="22"  >
                         <Rectangle.OpacityMask>
                             <VisualBrush Visual="{StaticResource appbar_location_round}" Stretch="Fill" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <Rectangle x:Name="transsta" Fill="#FFE72520" Height="38" Canvas.Left="681"  Canvas.Top="499" Width="38"  >
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Visual="{StaticResource appbar_location_circle}" Stretch="Fill" />
                         </Rectangle.OpacityMask>
                     </Rectangle>
                 </Canvas>
@@ -118,7 +123,7 @@
                             Margin="27,457,0,0" 
                             VerticalAlignment="Top"
                             Width="140" RenderTransformOrigin="0.426,-0.649" BorderBrush="#FF065FB9" 
-                            Foreground="#FF065FB9"/>
+                            Foreground="#FF065FB9" ValueChanged="slider_ValueChanged"/>
                     <Rectangle x:Name="button1" 
                                HorizontalAlignment="Left" Height="40" Margin="145,58,0,0" Stroke="#FF065FB9" StrokeThickness="5" VerticalAlignment="Top" Width="40" MouseDown="button1_MouseDown">
                         <Rectangle.Fill>
@@ -129,15 +134,15 @@
                             <VisualBrush Visual="{StaticResource appbar_arrow_up_down}" Stretch="Fill" />
                         </Rectangle.OpacityMask>
                     </Rectangle>
-                    <Controls:ToggleSwitch Header="路径可视化功能" 
+                    <Controls:ToggleSwitch x:Name="visual" 
+                                           Header="路径可视化功能" 
                                            HeaderFontFamily="微软雅黑"
-
                                            FontFamily="微软雅黑" 
                                            FontWeight="Bold" 
                                            Width="140" Height="70" 
                                            Margin="27,341,27,244" 
                                            Foreground="#FF065FB9" 
-                                           ThumbIndicatorBrush="#FF065FB9" />
+                                           ThumbIndicatorBrush="#FF065FB9"  />
                     <Label x:Name="label" 
                            Content="动画速度" 
                            FontFamily="微软雅黑" 
