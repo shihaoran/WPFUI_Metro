@@ -200,7 +200,7 @@ namespace WpfMetro
             {
                 try
                 {
-                    result = CalculateCore.BFSPath(from, to);
+                    result = CalculateCore.ChinPostPath(from);
                 }
                 catch (InputStationException e1)
                 {
@@ -316,7 +316,8 @@ namespace WpfMetro
                     {
                         Name = linesplit[0],
                         ID = CalculateCore.StaCollection[linesplit[0]].ID,
-                        isTrans = false
+                        isTrans = false,
+                        TransLine=""
                     });
                 }
                 else if (linesplit.Length == 2)
@@ -325,7 +326,8 @@ namespace WpfMetro
                     {
                         Name = linesplit[0],
                         ID = CalculateCore.StaCollection[linesplit[0]].ID,
-                        isTrans = true
+                        isTrans = true,
+                        TransLine= linesplit[1]
                     });
                 }
                 else
@@ -416,5 +418,6 @@ namespace WpfMetro
         public string Name { get; set; }
         public int ID { get; set; }
         public bool isTrans { get; set; }
+        public string TransLine { get; set; }
     }
 }

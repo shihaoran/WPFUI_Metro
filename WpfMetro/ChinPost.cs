@@ -380,16 +380,18 @@ namespace WpfMetro
                 AddShortPaths(); // 根据odd数组添加最短路径
             }
         }
-        public int PrintBound(int stano)
+        public Tuple<LinkedList<PathSection>, int> ReturnBound(int stano)
         {
             int add = 0;
+            LinkedList<PathSection> list = new LinkedList<PathSection>();
             foreach (string end in metrosys.StaCollection[NoToName[stano]].EndStas)
             {
-                Console.WriteLine(NoToName[stano] + "-" + end);
-                Console.WriteLine(end + "-" + NoToName[stano]);
-                add += metrosys.SectionLen(metrosys.StaCollection[end], metrosys.StaCollection[NoToName[stano]]) * 2;
+                list.AddLast(metrosys.MakePathSection(metrosys.StaCollection[NoToName[stano]], metrosys.StaCollection[end]));
+                list.AddLast(metrosys.MakePathSection(metrosys.StaCollection[end], metrosys.StaCollection[NoToName[stano]]));
+                add += metrosys.SectionLen(metrosys.StaCollection[end], metrosys.StaCollection[NoToName[stano]]) ;
+                add += metrosys.SectionLen(metrosys.StaCollection[NoToName[stano]], metrosys.StaCollection[end]);
             }
-            return add;
+            return Tuple.Create(list,add);
         }
         /*
         用Fleury算法求最短欧拉回游
@@ -398,21 +400,27 @@ namespace WpfMetro
         2)、除非没有别的边可选择，否则 ei+1不能是Gi=G-｛e1,e2,…,ei｝的割边。
         3)、 当(2)不能执行时，算法停止。
         */
-        public void Fleury(int start,string string_in,string string_out,int addcount)
+        public Tuple<LinkedList<PathSection>,int> Fleury(int start)
         {
             int i;
             int vi = start; // v0e1v1…eivi已经选定
             bool bNoPoints=false, bCnecTest;
-            Console.WriteLine("最短路线");
-            Console.Write(string_in);
             bool flag = false;
             int sum = 0;
             bool[] boundprinted = new bool[MAX_NODE];
+            LinkedList<PathSection> path = new LinkedList<PathSection>();
             for (i = 0; i < MAX_NODE; i++)
                 boundprinted[i] = false;
+            boundprinted[vi] = true; 
+            //下面if这段代码改在调用之前实现
             if (metrosys.StaCollection[NoToName[vi]].isBoundary && boundprinted[vi] == false)
             {
-                sum += PrintBound(vi);
+                Tuple<LinkedList<PathSection>, int> t1= ReturnBound(vi);
+                sum += t1.Item2;
+                foreach(PathSection p in t1.Item1)
+                {
+                    path.AddLast(p);
+                }
                 boundprinted[vi] = true;
             }
             while (true)
@@ -437,12 +445,17 @@ namespace WpfMetro
                             continue;
                         }
                         // 选定（vi，i）这条边
-                        Console.WriteLine(NoToName[vi] + "-" + NoToName[i]);
+                        path.AddLast(metrosys.MakePathSection(metrosys.StaCollection[NoToName[vi]], metrosys.StaCollection[NoToName[i]]));
                         sum += metrosys.SectionLen(metrosys.StaCollection[NoToName[vi]], metrosys.StaCollection[NoToName[i]]);
                         vi = i;
                         if(metrosys.StaCollection[NoToName[vi]].isBoundary&&boundprinted[vi]==false)
                         {
-                            sum += PrintBound(vi);
+                            Tuple<LinkedList<PathSection>, int> t2 = ReturnBound(vi);
+                            sum += t2.Item2;
+                            foreach (PathSection p in t2.Item1)
+                            {
+                                path.AddLast(p);
+                            }
                             boundprinted[vi] = true;
                         }
                         flag = true;
@@ -457,12 +470,17 @@ namespace WpfMetro
                         {
                             Graph[vi, i]--; 
                             Graph[i, vi]--;
-                            Console.WriteLine(NoToName[vi] + "-" + NoToName[i]);
+                            path.AddLast(metrosys.MakePathSection(metrosys.StaCollection[NoToName[vi]], metrosys.StaCollection[NoToName[i]]));
                             sum += metrosys.SectionLen(metrosys.StaCollection[NoToName[vi]], metrosys.StaCollection[NoToName[i]]);
                             vi = i;
                             if (metrosys.StaCollection[NoToName[vi]].isBoundary && boundprinted[vi] == false)
                             {
-                                sum += PrintBound(vi);
+                                Tuple<LinkedList<PathSection>, int> t3 = ReturnBound(vi);
+                                sum += t3.Item2;
+                                foreach (PathSection p in t3.Item1)
+                                {
+                                    path.AddLast(p);
+                                }
                                 boundprinted[vi] = true;
                             }
                             flag = true;
@@ -471,12 +489,8 @@ namespace WpfMetro
                     }
                     if (flag == false)
                     {
-                        Console.Write(string_out);
-                        sum += addcount;
-                        Console.WriteLine("总长度为:"+sum);
-                        break;
-                    }
-                        
+                        return Tuple.Create(path, sum);
+                    }    
                 }
             }
         }
