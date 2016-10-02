@@ -46,6 +46,8 @@ namespace WpfMetro
         BackgroundWorker bgWorker = new BackgroundWorker();
         string[] pathresult;
         int speed = 2000;
+        Task<Tuple<string, int>> t1;
+        
 
 
         private void IMG1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -198,7 +200,22 @@ namespace WpfMetro
             {
                 try
                 {
-                    result = CalculateCore.ChinPostPath(from);
+                    if(t1!=null)
+                    {
+                        if (!t1.IsCompleted)
+                        {
+                            await this.ShowMessageAsync("Running!", "当前的后台任务还没有执行完毕，请您耐心等待，您现在可以使用遍历全线以外的功能查询其他路线");
+                            return;
+                        }
+                    }
+                    t1 = new Task<Tuple<string, int>>
+                       (CalChinPath, from, TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent);
+                    t1.Start();
+                    await this.ShowMessageAsync("Running!", "您启动了遍历全线功能，程序正在后台为您计算，大概需要1分钟左右，在此期间您可以继续查询其他路线，当计算完毕时，结果将为您展示");
+                    result = await t1;
+                    await this.ShowMessageAsync("算完啦!", "您之前查询的由\"" + from + "\"站开始的遍历结果已经算完啦，将为您呈现动画");
+                    handleResult(result);
+                    tabControl.SelectedIndex = 1;
                 }
                 catch (InputStationException e1)
                 {
@@ -206,11 +223,14 @@ namespace WpfMetro
                     await this.ShowMessageAsync("出错啦!", e1.Message);
                     return;
                 }
-
-                handleResult(result);
-                tabControl.SelectedIndex = 1;
             }
 
+        }
+        public Tuple<string,int> CalChinPath(object o)
+        {
+            string from = (string)o;
+            Tuple<string,int> result = CalculateCore.ChinPostPath(from);
+            return result;
         }
 
         private async void ProgressChanged_Handler(object sender, ProgressChangedEventArgs args)
@@ -335,7 +355,6 @@ namespace WpfMetro
             }
 
         }
-
         private void radioButtonD_Checked(object sender, RoutedEventArgs e)
         {
             calmode = 0;
@@ -414,7 +433,6 @@ namespace WpfMetro
         {
             speed = (101 - (int)e.NewValue) * 20;
         }
-
     }
     public class Member
     {
