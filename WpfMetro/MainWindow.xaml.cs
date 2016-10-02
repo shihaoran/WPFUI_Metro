@@ -412,6 +412,7 @@ namespace WpfMetro
         {
             speed = (101 - (int)e.NewValue) * 20;
         }
+
     }
     public class Member
     {

@@ -60,7 +60,7 @@
                              Text="请输入起点站" 
                              FontFamily="微软雅黑" 
                              VerticalAlignment="Top" 
-                             Width="130"/>
+                             Width="130" />
                     <TextBox x:Name="textBoxTo" 
                              HorizontalAlignment="Center" 
                              Controls:TextBoxHelper.ClearTextButton="True" 
@@ -147,6 +147,10 @@
                            FontFamily="微软雅黑" 
                            FontSize="17"
                            HorizontalAlignment="Left" Height="35" Margin="24,417,0,0" VerticalAlignment="Top" Width="134" Foreground="#FF065FB9"/>
+                    <Label x:Name="label2" Content="慢                     快" 
+                           FontFamily="微软雅黑" 
+                           FontSize="17"
+                           HorizontalAlignment="Left" Height="35" Margin="24,481,0,0" VerticalAlignment="Top" Width="150" Foreground="#FF065FB9"/>
                 </Grid>
             </TabItem>
             <TabItem Header="最短路径" Background="#CBF3FB">
