@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="WpfMetro.Station">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAiAAAAEAgIEEAQAAIAAAAAAIAIAAAQAAAQAIAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="聚合" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="WpfMetro.PathSection">
+    <Position X="0.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAgIAAAAAAAAEAAAAAIgAAAAAAAIAAQAAABEAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="聚合" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="WpfMetro.Core">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAIAAAwABIglIEAgQAQAQAkCCAAAAAQIAAAABAAIAMQ=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WpfMetro.MapErrorException" Collapsed="true">
+    <Position X="13" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ExtraException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WpfMetro.InputStationException" Collapsed="true">
+    <Position X="11" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ExtraException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.ApplicationException" Collapsed="true">
+    <Position X="12" Y="3" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="WpfMetro.Line">
+    <Position X="7.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAIAAAAACAgAAQEAAAAAAAAAQQAAADEAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="聚合" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="WpfMetro.ChinPost">
+    <Position X="9" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAiAxAAAAAAAEBhAAAAABQgAAAAAAxQCQABQAAJAgA=</HashCode>
+      <FileName>ChinPost.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="聚合" />
+    </ShowAsAssociation>
+  </Class>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

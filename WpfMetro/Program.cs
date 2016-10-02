@@ -51,6 +51,18 @@ namespace WpfMetro
             PlaceOfLine.Add(l, l.getStaCount()+1);
         }
 
+        public Core 聚合
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+
+            set
+            {
+            }
+        }
+
         public void addLine(Line l)
         {
             if(!PlaceOfLine.ContainsKey(l))
@@ -96,6 +108,18 @@ namespace WpfMetro
             LineName = name;
         }
 
+        public Core 聚合
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+
+            set
+            {
+            }
+        }
+
         public int getStaCount()
         {
             return Stations.Count;
@@ -135,6 +159,19 @@ namespace WpfMetro
             LineName = s;
                
         }
+
+        public Core 聚合
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+
+            set
+            {
+            }
+        }
+
         public override string ToString()
         {
             string s=null;
@@ -178,11 +215,11 @@ namespace WpfMetro
         Dictionary<string, int> NameToNo = new Dictionary<string, int>();
         public Dictionary<int, string> NoToName = new Dictionary<int, string>();
         Dictionary<string, Station> TransStaCollection = new Dictionary<string, Station>();
-        static int MAXN=60;
-        private static int[,] graph = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
-      private static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
-      //    public static int[,] graph = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
-     //   public static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+        public static int MAXN=60;
+        public static int[,] graph = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+        public static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+        //   public static int[,] graph = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+        //   public static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
 
 
         private int _minLine;
@@ -214,27 +251,83 @@ namespace WpfMetro
             StreamReader sr = new StreamReader(fs, Encoding.Default);
             int oneWayFlag = 0;
             //StreamReader sr = File.OpenText("beijing-subway.txt");
-            string readIn = sr.ReadLine();
+            string readIn;
+            try
+            {
+                readIn = sr.ReadLine();
+            }
+            catch (OutOfMemoryException e)
+            {
+                throw e;
+            }
+            catch (IOException e)
+            {
+                throw e;
+            }
+            
             while (readIn != null)
             {
                 if (readIn.Equals("BEGIN"))
                 {
-                    string isRound = sr.ReadLine();
+                    //读取是否环线
+                    string isRound;
+                    try
+                    {
+                        isRound = sr.ReadLine();
+                    }
+                    catch (OutOfMemoryException e)
+                    {
+                        throw e;
+                    }
+                    catch (IOException e)
+                    {
+                        throw e;
+                    }
                     //isRound异常判断
-                    if(!isRound.Equals("环线") && !isRound.Equals("非环线"))
+                    if (!isRound.Equals("环线") && !isRound.Equals("非环线"))
                     {
                         var e = new MapErrorException("文件中某行应为是否环线。格式出错。");
                         throw e;
                     }
 
-                    string isOneWay = sr.ReadLine();
-                    if(!isOneWay.Equals("双向") && !isOneWay.Equals("单向"))
+
+                    //读取是否单行线
+                    string isOneWay;
+                    try
+                    {
+                        isOneWay = sr.ReadLine();
+                    }
+                    catch (OutOfMemoryException e)
+                    {
+                        throw e;
+                    }
+                    catch (IOException e)
+                    {
+                        throw e;
+                    }
+                    if (!isOneWay.Equals("双向") && !isOneWay.Equals("单向"))
                     {
                         var e = new MapErrorException("文件中某行应为单双向。格式出错。");
                         throw e;
                     }
 
-                    string name = sr.ReadLine();//TODO:要不要加异常？？？
+
+                    //读取站点名
+                    string name;
+                    try
+                    {
+                        name = sr.ReadLine();
+                    }
+                    catch (OutOfMemoryException e)
+                    {
+                        throw e;
+                    }
+                    catch (IOException e)
+                    {
+                        throw e;
+                    }
+
+                    //进行处理
                     Line MetroLine = new Line(name);
                     if (isRound.Equals("环线"))
                     {
@@ -246,14 +339,39 @@ namespace WpfMetro
                     }
                     if (!LineCollection.ContainsKey(name))
                         LineCollection.Add(name, MetroLine);
-                    readIn = sr.ReadLine();
+                    //读取下一站
+                    try
+                    {
+                        readIn = sr.ReadLine();
+                    }
+                    catch (OutOfMemoryException e)
+                    {
+                        throw e;
+                    }
+                    catch (IOException e)
+                    {
+                        throw e;
+                    }
+
+
                     while (readIn != "END" && readIn != null)
                     {
                         if (readIn.Equals("0") || readIn.Equals("1") ||
                             readIn.Equals("2") || readIn.Equals("3"))
                         {
                             oneWayFlag = Convert.ToInt32(readIn);
-                            readIn = sr.ReadLine();
+                            try
+                            {
+                                readIn = sr.ReadLine();
+                            }
+                            catch (OutOfMemoryException e)
+                            {
+                                throw e;
+                            }
+                            catch (IOException e)
+                            {
+                                throw e;
+                            }
                             continue;
                         }
 
@@ -277,9 +395,19 @@ namespace WpfMetro
                             NoToName.Add(TransStaCount, infos[3]);
                             StaCollection[infos[3]].setTransStaNo(TransStaCount);
                         }
-                        readIn = sr.ReadLine();
+                        try
+                        {
+                            readIn = sr.ReadLine();
+                        }
+                        catch (OutOfMemoryException e)
+                        {
+                            throw e;
+                        }
+                        catch (IOException e)
+                        {
+                            throw e;
+                        }
                         MetroLine.addSta(StaCollection[infos[3]], oneWayFlag);
-
                     }
 
                 }
@@ -300,6 +428,9 @@ namespace WpfMetro
                     throw e;
                 }
             }
+
+            sr.Close();
+            fs.Close();
         }
         public void BuildGragph(string old1,string old2,string new1)
         {

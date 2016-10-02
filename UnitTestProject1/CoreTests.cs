@@ -19,7 +19,7 @@ namespace WpfMetro.Tests
             {
                 core.ReadData();
             }
-            catch (MapErrorException e)
+            catch (Exception e)
             {
                 System.Console.WriteLine(e.Message);
             }
@@ -38,13 +38,14 @@ namespace WpfMetro.Tests
             {
                 core.ReadData();
             }
-            catch (MapErrorException e)
+            catch (Exception e)
             {
                 System.Console.WriteLine(e.Message);
             }
             core.BuildGragph("", "", "");
-            //     int i = new Int32;
-            //        i = graph[1, 2]; 
+            int i;
+            i = Core.graph[1, 2];
+            Assert.AreEqual(2, i);
         }
 
         [TestMethod()]
@@ -55,7 +56,7 @@ namespace WpfMetro.Tests
             {
                 core.ReadData();
             }
-            catch (MapErrorException e)
+            catch (Exception e)
             {
                 System.Console.WriteLine(e.Message);
             }
@@ -85,14 +86,131 @@ namespace WpfMetro.Tests
             {
                 core.ReadData();
             }
-            catch (MapErrorException e)
+            catch (Exception e)
             {
                 System.Console.WriteLine(e.Message);
             }
 
-            Tuple<string,int> a =  core.DijkstraPath("沙河", "南锣鼓巷");
+            Tuple<string, int> a = core.DijkstraPath("沙河", "南锣鼓巷");
 
-            Assert.AreEqual(3,a.Item2);
+            Assert.AreEqual(3, a.Item2);
+        }
+
+        [TestMethod()]
+        public void BFSPathTest()
+        {
+            Core core = new Core();
+            core.ReadData();
+            Tuple<string, int> a = core.BFSPath("沙河", "土桥");
+
+            Assert.AreEqual(34, a.Item2);
+        }
+
+        [TestMethod()]
+        public void MakePathSectionTest()
+        {
+            Core core = new Core();
+            core.ReadData();
+            Station a = null;
+            Station b = null;
+            Station c = null;
+            PathSection d = null;
+
+            core.StaCollection.TryGetValue("西直门", out a);
+            core.StaCollection.TryGetValue("北京站", out b);
+            core.StaCollection.TryGetValue("大钟寺", out c);
+
+            d = core.MakePathSection(a, b);
+            Assert.AreEqual("2号线", d.LineName);
+            Assert.AreEqual(9, d.list.Count);
+
+            d = core.MakePathSection(a, c);
+            Assert.AreEqual("13号线", d.LineName);
+            Assert.AreEqual(1, d.list.Count);
+
+
+
+
+        }
+
+        [TestMethod()]
+        public void FindLinePathTest()
+        {
+            Core core = new Core();
+            core.ReadData();
+            Station a = null;
+            Station b = null;
+            Station c = null;
+            Line l = null;
+            PathSection d = null;
+
+            core.StaCollection.TryGetValue("西直门", out a);
+            core.StaCollection.TryGetValue("北京站", out b);
+            core.StaCollection.TryGetValue("大钟寺", out c);
+            core.LineCollection.TryGetValue("10号线", out l);
+
+            d = core.FindLinePath(a, b, l);
+
+            d = core.FindLinePath(a, b, l);
+        }
+
+        [TestMethod()]
+        public void isSameLineTest()
+        {
+            Core core = new Core();
+            core.ReadData();
+
+            Station a = null;
+            Station b = null;
+            Station c = null;
+            Line l = null;
+            PathSection d = null;
+
+            core.StaCollection.TryGetValue("西直门", out a);
+            core.StaCollection.TryGetValue("北京站", out b);
+            core.StaCollection.TryGetValue("大钟寺", out c);
+
+            l = core.isSameLine(a, b);
+            Assert.AreEqual("2号线", l.LineName);
+
+            l = core.isSameLine(b, c);
+            Assert.AreEqual(null, l);
+
+            l = core.isSameLine(a, c);
+            Assert.AreEqual("13号线", l.LineName);
+        }
+
+        [TestMethod()]
+        public void GetLinkedStationsTest()
+        {
+            Core core = new Core();
+            core.ReadData();
+            Station a = null;
+
+
+            core.StaCollection.TryGetValue("3号航站楼", out a);
+            List<Station> list = null;
+          
+            list = core.GetLinkedStations(a);
+            Assert.AreEqual(2,list.Count);
+        }
+
+        [TestMethod()]
+        public void GetShortestLinkedStationsTest()
+        {
+            Core core = new Core();
+            core.ReadData();
+            Station a = null;
+            Station b = null;
+            Station c = null;
+            Line l = null;
+            PathSection d = null;
+
+            core.StaCollection.TryGetValue("五道口", out a);
+            List<Station> list = core.GetShortestLinkedStations(a);
+
+
+            Assert.AreEqual("知春路",list.First().StationName);
         }
     }
 }
