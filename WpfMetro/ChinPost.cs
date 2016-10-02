@@ -31,6 +31,18 @@ namespace WpfMetro
             metrosys = p;
         }
 
+        public Core 聚合
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+
+            set
+            {
+            }
+        }
+
         public void Initial(int[,] graph,int dingdian,int start)
         {
             int i, j;

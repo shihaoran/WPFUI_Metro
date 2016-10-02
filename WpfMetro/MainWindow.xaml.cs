@@ -154,9 +154,9 @@ namespace WpfMetro
             }
             catch (NullReferenceException e1)
             {
-                System.Console.WriteLine(e1.Message);
-                //TODO
-                MessageBox.Show(e1.Message);
+                //空引用异常 程序直接结束
+                await this.ShowMessageAsync("出错啦!", e1.Message);
+                Application.Current.Shutdown();
                 return;
             }
             dataGrid.DataContext = memberData;
@@ -171,12 +171,11 @@ namespace WpfMetro
                 }
                 catch (InputStationException e1)
                 {
-                    //TODO
-                    System.Console.WriteLine(e1.Message);
-                    MessageBox.Show(e1.Message);
+                    //站点输入异常
+                    await this.ShowMessageAsync("出错啦!", e1.Message);
                     return;
                 }
-                handleResult(result);
+                handleResult(result);//TODO:捕获其中异常
                 tabControl.SelectedIndex = 1;
             }
             else if (calmode == 1)
@@ -187,13 +186,12 @@ namespace WpfMetro
                 }
                 catch (InputStationException e1)
                 {
-                    //TODO
-                    System.Console.WriteLine(e1.Message);
-                    MessageBox.Show(e1.Message);
+                    //站点输入异常
+                    await this.ShowMessageAsync("出错啦!", e1.Message);
                     return;
                 }
 
-                handleResult(result);
+                handleResult(result);//TODO:捕获异常
                 tabControl.SelectedIndex = 1;
             }
             else if (calmode == 2)
@@ -204,13 +202,12 @@ namespace WpfMetro
                 }
                 catch (InputStationException e1)
                 {
-                    //TODO
-                    System.Console.WriteLine(e1.Message);
-                    MessageBox.Show(e1.Message);
+                    //站点输入异常
+                    await this.ShowMessageAsync("出错啦!", e1.Message);
                     return;
                 }
 
-                handleResult(result);
+                handleResult(result);//TODO:捕获异常
                 tabControl.SelectedIndex = 1;
             }
 
@@ -244,7 +241,7 @@ namespace WpfMetro
         }
         private void DoWork_Handler(object sender, DoWorkEventArgs args)
         {
-            //在DoWork中修改UI同样会抛出异常
+            //在DoWork中修改UI同样会抛出异常  TODO:不太懂 可能要添加异常
             //label.Content = "DoWork方法执行完成";
             BackgroundWorker worker = sender as BackgroundWorker;
             string[] s = args.Argument.ToString().Split('\n');
@@ -354,8 +351,10 @@ namespace WpfMetro
             calmode = 2;
         }
 
-        private void BackFrame_Loaded(object sender, RoutedEventArgs e)
+        private async void BackFrame_Loaded(object sender, RoutedEventArgs e)
         {
+            memberData = new System.Collections.ObjectModel.ObservableCollection<Member>();
+
             CalculateCore = new Core();
             try
             {
@@ -363,31 +362,35 @@ namespace WpfMetro
             }
             catch (FileNotFoundException e1)
             {
-                //TODO:这里要输出一个错误信息  程序退出 以下三个try catch
-                System.Console.WriteLine(e1.Message);
-                MessageBox.Show(e1.Message);
+                //这里要输出一个错误信息  程序退出 以下三个try catch
+                await this.ShowMessageAsync("地图文件错误！", "找不到地图文件，程序即将关闭，请稍后重新启动程序。错误信息:" + e1.Message);
+                Application.Current.Shutdown();
+                return;
+            }
+            catch (OutOfMemoryException e1)
+            {
+                await this.ShowMessageAsync("发生错误！", "程序即将关闭，请稍后重新启动程序。错误信息:" + e1.Message);
+                Application.Current.Shutdown();
                 return;
             }
             catch (IOException e2)
             {
-                //TODO:同样要输出错误信息
-                System.Console.WriteLine(e2.Message);
-                MessageBox.Show(e2.Message);
+                //同样要输出错误信息
+                await this.ShowMessageAsync("发生错误！", "读入文件时发生IO错误，程序即将关闭，请稍后重新启动程序。错误信息:" + e2.Message);
+                Application.Current.Shutdown();
                 return;
             }
             catch (MapErrorException e3)
             {
-                //TODO:
-                System.Console.WriteLine(e3.Message);
-                MessageBox.Show(e3.Message);
+                //
+                await this.ShowMessageAsync("地图文件错误！", e3.Message + "程序即将关闭，请稍后重新启动程序。");
+                Application.Current.Shutdown();
                 return;
             }
-
             CalculateCore.BuildGragph("", "", "");
-            memberData = new System.Collections.ObjectModel.ObservableCollection<Member>();
         }
 
-        private void buttonClear_Click(object sender, RoutedEventArgs e)
+        private async void buttonClear_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -395,9 +398,9 @@ namespace WpfMetro
             }
             catch (NullReferenceException e1)
             {
-                System.Console.WriteLine(e1.Message);
-                //TODO
-                MessageBox.Show(e1.Message);
+                //空引用异常 程序直接结束
+                await this.ShowMessageAsync("出错啦!", e1.Message);
+                Application.Current.Shutdown();
                 return;
             }
             dataGrid.DataContext = memberData;
