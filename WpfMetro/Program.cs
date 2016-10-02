@@ -459,7 +459,15 @@ namespace WpfMetro
                 pointer = 1;
             for (int i = 1; i <= TransStaCount-pointer; i++)
             {
-                List<Station> temp = GetLinkedStations(TransStaCollection[NoToName[i]]);
+                List<Station> temp;
+                try
+                {
+                    temp = GetLinkedStations(TransStaCollection[NoToName[i]]);
+                }
+                catch (KeyNotFoundException e)
+                {
+                    throw e;
+                }
                 foreach(Station s in temp)
                 {
                     if(graph[i,NameToNo[s.StationName]]==0|| graph[i,NameToNo[s.StationName]]==BigNum) //优化时间
@@ -645,7 +653,14 @@ namespace WpfMetro
             {
                 if (NoToName[ToNo1] == t)
                 {
-                    len1 = DijkstraLen(FromNo1, ToNo1, parents1);
+                    try
+                    {
+                        len1 = DijkstraLen(FromNo1, ToNo1, parents1);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        throw e;
+                    }
                     len1 += SectionLen(from, StaCollection[NoToName[FromNo1]]);
                     if (FromTuple.Item1 == 2)
                     {
@@ -756,7 +771,15 @@ namespace WpfMetro
             int n = TransStaCount;
             for (int i = 1; i <= n; i++)
             {
-                dist[i] = graph[fromno,i];//Set the dist[]  
+                try
+                {
+                    dist[i] = graph[fromno, i];//Set the dist[]  
+                }
+                catch (IndexOutOfRangeException e)
+                {
+                    throw e;
+                }
+
                 if (dist[i] < BigNum)
                     parents[i] = fromno;
             }
@@ -961,14 +984,29 @@ namespace WpfMetro
         public PathSection MakePathSection(Station from, Station to)
         {
             Line l = isSameLine(from, to);
-            PathSection p = FindLinePath(from, to, l);
+            PathSection p;
+            try
+            {
+                p = FindLinePath(from, to, l);
+            }
+            catch (KeyNotFoundException e)
+            {
+                throw e;
+            }
             return p;
         }
         public PathSection FindLinePath(Station from, Station to, Line l)
         {
             PathSection p = new PathSection(l.LineName);
-            int start = from.PlaceOfLine[l];
-            int end = to.PlaceOfLine[l];
+
+            int start, end;
+            if(!from.PlaceOfLine.ContainsKey(l) || !to.PlaceOfLine.ContainsKey(l))
+            {
+                throw new KeyNotFoundException();
+            }
+
+            start = from.PlaceOfLine[l];
+            end = to.PlaceOfLine[l];
             if (l.isOneWay)
             {
                 PathSection p1 = new PathSection(l.LineName);
@@ -1147,7 +1185,15 @@ namespace WpfMetro
                 if (l.Stations.Contains(s2))
                 {
                     linecount++;
-                    int len = FindLinePath(s1, s2, l).GetLen();
+                    int len;
+                    try
+                    {
+                        len = FindLinePath(s1, s2, l).GetLen();
+                    }
+                    catch (KeyNotFoundException e)
+                    {
+                        throw e;
+                    }
                     if(!list.ContainsKey(len))
                         list.Add(len, l);
                 }
