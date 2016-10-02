@@ -83,11 +83,11 @@ namespace WpfMetro
         }
         public void addEndSta(string[] infos)
         {
-            if (infos[1].Equals("IsBound"))
+            if (infos[4].Equals("IsBound"))
             {
                 isBoundary = true;
-                if (!EndStas.Contains(infos[2]))
-                    EndStas.Add(infos[2]);
+                if (!EndStas.Contains(infos[5]))
+                    EndStas.Add(infos[5]);
             }
         }
     }
@@ -384,7 +384,10 @@ namespace WpfMetro
                             if (infos.Length > 4)
                             {
                                 if (infos[4].Equals("IsBound"))
+                                {
                                     StaCollection[infos[3]].addEndSta(infos);
+                                    StaCollection[infos[3]].isBoundary = true;
+                                }
                             }
                         }
                         if (StaCollection[infos[3]].isTrans && (!TransStaCollection.ContainsKey(infos[3])))
@@ -510,7 +513,7 @@ namespace WpfMetro
             {
                 if (l.oneWayFlag.ElementAt(i) == 1)
                     break;
-                if (l.Stations.ElementAt(i).isTrans)
+                if (l.Stations.ElementAt(i).isTrans&&!staList.Contains(l.Stations.ElementAt(i).StationName))
                 {
                     staList.Add(l.Stations.ElementAt(i).StationName);
                     count++;
@@ -524,17 +527,17 @@ namespace WpfMetro
         {
             if (!StaCollection.ContainsKey(f) && StaCollection.ContainsKey(t))
             {
-                var e = new InputStationException("起始站点" + f + "不存在！");
+                var e = new InputStationException("起始站点\"" + f + "\"不存在！");
                 throw e;
             }
             if (!StaCollection.ContainsKey(t) && StaCollection.ContainsKey(f))
             {
-                var e = new InputStationException("目标站点" + t + "不存在！");
+                var e = new InputStationException("目标站点\"" + t + "\"不存在！");
                 throw e;
             }
             if (!StaCollection.ContainsKey(t) && !StaCollection.ContainsKey(f))
             {
-                var e = new InputStationException("起始站点" + f + "和目标站点" + t + "都不存在！");
+                var e = new InputStationException("起始站点\"" + f + "\"和目标站点\"" + t + "\"都不存在！");
                 throw e;
             }
             if (f.Equals(t))
@@ -788,17 +791,17 @@ namespace WpfMetro
         {
             if (!StaCollection.ContainsKey(f) && StaCollection.ContainsKey(t))
             {
-                var e = new InputStationException("起始站点" + f + "不存在！");
+                var e = new InputStationException("起始站点\"" + f + "\"不存在！");
                 throw e;
             }
             if (!StaCollection.ContainsKey(t) && StaCollection.ContainsKey(f))
             {
-                var e = new InputStationException("目标站点" + t + "不存在！");
+                var e = new InputStationException("目标站点\"" + t + "\"不存在！");
                 throw e;
             }
             if (!StaCollection.ContainsKey(t) && !StaCollection.ContainsKey(f))
             {
-                var e = new InputStationException("起始站点" + f + "和目标站点" + t + "都不存在！");
+                var e = new InputStationException("起始站点\"" + f + "\"和目标站点\"" + t + "\"都不存在！");
                 throw e;
             }
             if (f.Equals(t))
@@ -1237,6 +1240,93 @@ namespace WpfMetro
             }
             return linksta;
             
+        }
+        public Tuple<string, int> ChinPostPath(string f)
+        {
+            if (!StaCollection.ContainsKey(f))
+            {
+                var e = new InputStationException("起始站点\"" + f + "\"不存在！");
+                throw e;
+            }
+            int startstano = -1;
+            int addcount = 0;
+            int count = 0;
+            PathSection pathsection_out=null;
+            LinkedList<PathSection> pathlist = new LinkedList<PathSection>();
+            Station from = StaCollection[f];
+            if (from.isTrans)
+            {
+                startstano = NameToNo[f];
+            }
+            else
+            {
+                Tuple<int,List<string>> t=FindNearestTransSta(from);
+                //TODO 加入如果找到站点数量不等于1或者2的异常
+                if(t.Item1==1)//说明起点站在尽头路段上
+                {
+                    Station Trans = StaCollection[t.Item2.First()];
+                    if(Trans.EndStas.Count!=0)//处理是多条线的尽头站的问题
+                    {
+                        string endfromline = ""; //表示起点站所在线的尽头站
+                        foreach (string e in Trans.EndStas)
+                        {
+                            if(isSameLine(StaCollection[e],from)!=null)
+                            {
+                                endfromline = e;
+                                PathSection p1 = MakePathSection(from, StaCollection[endfromline]);
+                                PathSection p2 = MakePathSection(StaCollection[endfromline], Trans);
+                                count += p1.GetLen() + p2.GetLen();
+                                pathlist.AddLast(p1);
+                                pathlist.AddLast(p2);
+                            }
+                        }
+                        foreach (string e in Trans.EndStas)
+                        {
+                            if (!e.Equals(endfromline))
+                            {
+                                PathSection p1 = MakePathSection(Trans, StaCollection[e]);
+                                PathSection p2 = MakePathSection(StaCollection[e], Trans);
+                                count += p1.GetLen() + p2.GetLen();
+                                pathlist.AddLast(p1);
+                                pathlist.AddLast(p2);
+                            }
+                        }
+                    }
+                    pathsection_out = MakePathSection(Trans, from);
+                    addcount = pathsection_out.GetLen();
+                    startstano = NameToNo[Trans.StationName];
+                }
+                else if(t.Item1==2) //说明起点站在中间路段上
+                {
+                    TransStaCollection.Add(f, from);
+                    TransStaCount++;
+                    NameToNo.Add(f, TransStaCount);
+                    NoToName.Add(TransStaCount, f);
+                    StaCollection[f].setTransStaNo(TransStaCount);
+                    string new1 = f;
+                    string old1 = t.Item2.First();
+                    string old2 = t.Item2.Last();
+                    BuildGragph(old1, old2, new1);
+                    startstano = TransStaCount;
+                }
+                else
+                {
+                    //在这里加入异常
+                }
+            }
+            ChinPost cp = new ChinPost(this);
+            cp.Initial(graph1, TransStaCount, startstano);
+            cp.OddDeal();
+            Tuple<LinkedList<PathSection>,int> result=cp.Fleury(startstano);
+            count += addcount + result.Item2;
+            foreach(PathSection p in result.Item1)
+            {
+                pathlist.AddLast(p);
+            }
+            if(pathsection_out!=null)
+                pathlist.AddLast(pathsection_out);
+            string path = HandlePath(pathlist);
+            return Tuple.Create(path, count);
         }
         static void test()
         {

@@ -139,7 +139,9 @@
                                            FontFamily="微软雅黑" 
                                            FontWeight="Bold" 
                                            Width="140" Height="70" 
-                                           Margin="27,341,27,244" 
+                                           Margin="27,341,0,0" 
+                                           VerticalAlignment="Top"
+                                           HorizontalAlignment="Left"
                                            Foreground="#FF065FB9" 
                                            ThumbIndicatorBrush="#FF065FB9"  />
                     <Label x:Name="label" 
@@ -159,9 +161,10 @@
                               AutoGenerateColumns="False"
                               Style="{StaticResource AzureDataGrid}" Height="Auto" >
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="ID" Width="50" Binding="{Binding ID}" Foreground="#FF065FB9"/>
-                            <DataGridTextColumn Header="站点名称" Width="80" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="ID" Width="35" Binding="{Binding ID}" Foreground="#FF065FB9"/>
+                            <DataGridTextColumn Header="站点名称" Width="70" Binding="{Binding Name}"/>
                             <DataGridCheckBoxColumn Header="换乘" Binding="{Binding isTrans}"/>
+                            <DataGridTextColumn Header="换乘线路" Width="70" Binding="{Binding TransLine}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <Button x:Name="buttonClear" Content="清空路线" FontFamily="微软雅黑" 
