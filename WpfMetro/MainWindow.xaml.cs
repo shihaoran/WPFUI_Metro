@@ -175,7 +175,7 @@ namespace WpfMetro
                     await this.ShowMessageAsync("出错啦!", e1.Message);
                     return;
                 }
-                handleResult(result);//TODO:捕获其中异常
+                handleResult(result);
                 tabControl.SelectedIndex = 1;
             }
             else if (calmode == 1)
@@ -191,7 +191,7 @@ namespace WpfMetro
                     return;
                 }
 
-                handleResult(result);//TODO:捕获异常
+                handleResult(result);
                 tabControl.SelectedIndex = 1;
             }
             else if (calmode == 2)
@@ -207,7 +207,7 @@ namespace WpfMetro
                     return;
                 }
 
-                handleResult(result);//TODO:捕获异常
+                handleResult(result);
                 tabControl.SelectedIndex = 1;
             }
 
@@ -241,7 +241,7 @@ namespace WpfMetro
         }
         private void DoWork_Handler(object sender, DoWorkEventArgs args)
         {
-            //在DoWork中修改UI同样会抛出异常  TODO:不太懂 可能要添加异常
+            //在DoWork中修改UI同样会抛出异常
             //label.Content = "DoWork方法执行完成";
             BackgroundWorker worker = sender as BackgroundWorker;
             string[] s = args.Argument.ToString().Split('\n');
@@ -284,7 +284,7 @@ namespace WpfMetro
             string[] s = result.Item1.Split('\n');
             if (result.Item2 == 0)
             {
-                await this.ShowMessageAsync("出错啦!", result.Item1);//TODO 抛出异常 
+                await this.ShowMessageAsync("出错啦!", result.Item1);
                 return;
             }
             //删除之前的控件
@@ -329,7 +329,7 @@ namespace WpfMetro
                 }
                 else
                 {
-                    await this.ShowMessageAsync("出错啦!", "呀计算模块好像出了问题");//TODO???
+                    await this.ShowMessageAsync("出错啦!", "呀计算模块好像出了问题");
                 }
                 dataGrid.DataContext = memberData;
             }

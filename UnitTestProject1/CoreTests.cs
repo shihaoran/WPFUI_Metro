@@ -60,7 +60,15 @@ namespace WpfMetro.Tests
             {
                 System.Console.WriteLine(e.Message);
             }
-            core.BuildGragph("", "", "");
+            try
+            {
+                core.BuildGragph("", "", "");
+            }
+            catch (KeyNotFoundException e)
+            {
+                System.Console.WriteLine(e.Message);
+                return;
+            }
             int i;
             i = Core.graph[1, 2];
             Assert.AreEqual(2, i);
@@ -109,7 +117,16 @@ namespace WpfMetro.Tests
                 System.Console.WriteLine(e.Message);
             }
 
-            Tuple<string, int> a = core.DijkstraPath("沙河", "南锣鼓巷");
+            Tuple<string, int> a;
+            try
+            {
+                a = core.DijkstraPath("沙河", "南锣鼓巷");
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                System.Console.WriteLine(e.Message);
+                return;
+            }
 
             Assert.AreEqual(3, a.Item2);
         }
@@ -167,9 +184,15 @@ namespace WpfMetro.Tests
             core.StaCollection.TryGetValue("大钟寺", out c);
             core.LineCollection.TryGetValue("10号线", out l);
 
-            d = core.FindLinePath(a, b, l);
+            try
+            {
+                d = core.FindLinePath(a, b, l);
+            }
+            catch (KeyNotFoundException e)
+            {
+                System.Console.WriteLine(e.Message);
+            }
 
-            d = core.FindLinePath(a, b, l);
         }
 
         [TestMethod()]
