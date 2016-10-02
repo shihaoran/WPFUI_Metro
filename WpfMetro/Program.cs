@@ -1326,9 +1326,10 @@ namespace WpfMetro
             if(pathsection_out!=null)
                 pathlist.AddLast(pathsection_out);
             string path = HandlePath(pathlist);
-            return Tuple.Create(path, count);
+            path = "\n" + f + path;
+            return Tuple.Create(path, count+1);
         }
-        static void test()
+        static void test()//原来命令行程序的读入读出模块，现已弃用
         {
             Core metrosys = new Core();
             metrosys.ReadData();
