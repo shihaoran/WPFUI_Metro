@@ -35,13 +35,12 @@
                              MouseWheel="IMG1_MouseWheel" >
                 <Canvas x:Name="IMG1" RenderTransform="{StaticResource Imageview}">
                     <Image x:Name="IMG2" Source="/Resources/地铁图.gif"   />
-                    <Button x:Name="button" Content="Button" Canvas.Left="466" Canvas.Top="330" Width="60" />
-                    <Rectangle x:Name="sta" Fill="#FFE72520" Height="30" Canvas.Left="689"  Canvas.Top="413" Width="22"  >
+                    <Rectangle x:Name="sta" Fill="#FFE72520" Height="30" Canvas.Left="168"  Canvas.Top="147" Width="22"  >
                         <Rectangle.OpacityMask>
                             <VisualBrush Visual="{StaticResource appbar_location_round}" Stretch="Fill" />
                         </Rectangle.OpacityMask>
                     </Rectangle>
-                    <Rectangle x:Name="transsta" Fill="#FFE72520" Height="38" Canvas.Left="681"  Canvas.Top="499" Width="38"  >
+                    <Rectangle x:Name="transsta" Fill="#FFE72520" Height="38" Canvas.Left="96"  Canvas.Top="139" Width="38"  >
                         <Rectangle.OpacityMask>
                             <VisualBrush Visual="{StaticResource appbar_location_circle}" Stretch="Fill" />
                         </Rectangle.OpacityMask>
