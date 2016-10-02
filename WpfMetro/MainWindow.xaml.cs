@@ -16,6 +16,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Threading;
 using System.ComponentModel;
+using System.IO;
 
 namespace WpfMetro
 {
@@ -147,32 +148,71 @@ namespace WpfMetro
         {
             string from = textBoxFrom.Text;
             string to = textBoxTo.Text;
-            memberData.Clear();
+            try
+            {
+                memberData.Clear();
+            }
+            catch (NullReferenceException e1)
+            {
+                System.Console.WriteLine(e1.Message);
+                //TODO
+                MessageBox.Show(e1.Message);
+                return;
+            }
             dataGrid.DataContext = memberData;
             Tuple<string, int> result;
             if (calmode == -1)
                 await this.ShowMessageAsync("出错啦!", "请选择路径计算方式");
             else if (calmode == 0)
             {
-                result = CalculateCore.DjistraPath(from, to);
+                try
+                {
+                    result = CalculateCore.DijkstraPath(from, to);
+                }
+                catch (InputStationException e1)
+                {
+                    //TODO
+                    System.Console.WriteLine(e1.Message);
+                    MessageBox.Show(e1.Message);
+                    return;
+                }
                 handleResult(result);
                 tabControl.SelectedIndex = 1;
             }
             else if (calmode == 1)
             {
-                result = CalculateCore.BFSPath(from, to);
+                try
+                {
+                    result = CalculateCore.BFSPath(from, to);
+                }
+                catch (InputStationException e1)
+                {
+                    //TODO
+                    System.Console.WriteLine(e1.Message);
+                    MessageBox.Show(e1.Message);
+                    return;
+                }
+
                 handleResult(result);
                 tabControl.SelectedIndex = 1;
             }
             else if (calmode == 2)
             {
-                result = CalculateCore.BFSPath(from, to);
+                try
+                {
+                    result = CalculateCore.BFSPath(from, to);
+                }
+                catch (InputStationException e1)
+                {
+                    //TODO
+                    System.Console.WriteLine(e1.Message);
+                    MessageBox.Show(e1.Message);
+                    return;
+                }
+
                 handleResult(result);
                 tabControl.SelectedIndex = 1;
             }
-
-
-
 
         }
 
@@ -247,7 +287,7 @@ namespace WpfMetro
             string[] s = result.Item1.Split('\n');
             if (result.Item2 == 0)
             {
-                await this.ShowMessageAsync("出错啦!", result.Item1);
+                await this.ShowMessageAsync("出错啦!", result.Item1);//TODO 抛出异常 
                 return;
             }
             //删除之前的控件
@@ -290,7 +330,7 @@ namespace WpfMetro
                 }
                 else
                 {
-                    await this.ShowMessageAsync("出错啦!", "呀计算模块好像出了问题");
+                    await this.ShowMessageAsync("出错啦!", "呀计算模块好像出了问题");//TODO???
                 }
                 dataGrid.DataContext = memberData;
             }
@@ -315,14 +355,49 @@ namespace WpfMetro
         private void BackFrame_Loaded(object sender, RoutedEventArgs e)
         {
             CalculateCore = new Core();
-            CalculateCore.ReadData();
+            try
+            {
+                CalculateCore.ReadData();
+            }
+            catch (FileNotFoundException e1)
+            {
+                //TODO:这里要输出一个错误信息  程序退出 以下三个try catch
+                System.Console.WriteLine(e1.Message);
+                MessageBox.Show(e1.Message);
+                return;
+            }
+            catch (IOException e2)
+            {
+                //TODO:同样要输出错误信息
+                System.Console.WriteLine(e2.Message);
+                MessageBox.Show(e2.Message);
+                return;
+            }
+            catch (MapErrorException e3)
+            {
+                //TODO:
+                System.Console.WriteLine(e3.Message);
+                MessageBox.Show(e3.Message);
+                return;
+            }
+
             CalculateCore.BuildGragph("", "", "");
             memberData = new System.Collections.ObjectModel.ObservableCollection<Member>();
         }
 
         private void buttonClear_Click(object sender, RoutedEventArgs e)
         {
-            memberData.Clear();
+            try
+            {
+                memberData.Clear();
+            }
+            catch (NullReferenceException e1)
+            {
+                System.Console.WriteLine(e1.Message);
+                //TODO
+                MessageBox.Show(e1.Message);
+                return;
+            }
             dataGrid.DataContext = memberData;
             labelLen.Content = "0";
             bgWorker.CancelAsync();
