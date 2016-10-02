@@ -1,6 +1,6 @@
 # WPFUI_Metro
-因为用了自定义风格的控件
-所以需要从NuGet上下载MahApps.Metro和MahApps.Metro.Resources包后才可以使用
+运行时需要手动往debug文件夹内添加地图文件
+地图文件在resource文件夹下
 
 地图支持鼠标滚轮缩放，拖动移动
 
