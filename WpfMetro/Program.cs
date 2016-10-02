@@ -174,13 +174,16 @@ namespace WpfMetro
     public class Core
     {
         public Dictionary<string, Station> StaCollection=new Dictionary<string, Station>();
-        Dictionary<string, Line> LineCollection=new Dictionary<string, Line>();
+        public Dictionary<string, Line> LineCollection=new Dictionary<string, Line>();
         Dictionary<string, int> NameToNo = new Dictionary<string, int>();
         public Dictionary<int, string> NoToName = new Dictionary<int, string>();
         Dictionary<string, Station> TransStaCollection = new Dictionary<string, Station>();
         static int MAXN=60;
-        private static int[,] graph = new int[MAXN,MAXN];//The Adjacency matrix of the graph  
-        private static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+        private static int[,] graph = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+      private static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+      //    public static int[,] graph = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+     //   public static int[,] graph1 = new int[MAXN, MAXN];//The Adjacency matrix of the graph  
+
 
         private int _minLine;
         private int _minTransCount;
@@ -188,9 +191,26 @@ namespace WpfMetro
         private LinkedList<PathSection> _shortestWays=new LinkedList<PathSection>();
 
         private static int TransStaCount = 0;
-        public void ReadData()
+        public void ReadData()//添加异常
         {
-            FileStream fs = new FileStream(System.AppDomain.CurrentDomain.BaseDirectory +"beijing-subway.txt", FileMode.Open);
+            FileStream fs;
+            try
+            {
+                fs = new FileStream("beijing-subway.txt", FileMode.Open);
+                
+            }
+            catch (FileNotFoundException e)
+            {
+                System.Console.WriteLine(e.Message);
+                System.Console.WriteLine("文件不存在，请重新运行程序。");
+                throw e;
+            }
+            catch (IOException e1)
+            {
+                System.Console.WriteLine(e1.Message);
+                throw e1;
+            }
+
             StreamReader sr = new StreamReader(fs, Encoding.Default);
             int oneWayFlag = 0;
             //StreamReader sr = File.OpenText("beijing-subway.txt");
@@ -200,8 +220,21 @@ namespace WpfMetro
                 if (readIn.Equals("BEGIN"))
                 {
                     string isRound = sr.ReadLine();
+                    //isRound异常判断
+                    if(!isRound.Equals("环线") && !isRound.Equals("非环线"))
+                    {
+                        var e = new MapErrorException("文件中某行应为是否环线。格式出错。");
+                        throw e;
+                    }
+
                     string isOneWay = sr.ReadLine();
-                    string name = sr.ReadLine();
+                    if(!isOneWay.Equals("双向") && !isOneWay.Equals("单向"))
+                    {
+                        var e = new MapErrorException("文件中某行应为单双向。格式出错。");
+                        throw e;
+                    }
+
+                    string name = sr.ReadLine();//TODO:要不要加异常？？？
                     Line MetroLine = new Line(name);
                     if (isRound.Equals("环线"))
                     {
@@ -251,7 +284,21 @@ namespace WpfMetro
 
                 }
                 else
-                    readIn = sr.ReadLine();
+                {
+                    //抛出异常
+                    var e = new MapErrorException("文件中某行应为BEGIN。格式出错。");
+                    throw e;
+                }
+                readIn = sr.ReadLine();
+            }
+
+            for(int i = 0; i < LineCollection.Values.Count; i++)
+            {
+                if(LineCollection.Values.ElementAt(i).getStaCount() == 0)
+                {
+                    var e = new MapErrorException("地图信息错误，线路" + LineCollection.Values.ElementAt(i).LineName + "不存在站点");
+                    throw e;
+                }
             }
         }
         public void BuildGragph(string old1,string old2,string new1)
@@ -342,28 +389,48 @@ namespace WpfMetro
 
             return Tuple.Create(count, staList);
         }
-        public Tuple<string,int> DjistraPath(string f,string t)
+        public Tuple<string,int> DijkstraPath(string f,string t)//添加异常
         {
-            if (!StaCollection.ContainsKey(f))
-                return Tuple.Create(f + " is not contain", 0);
-            if (!StaCollection.ContainsKey(t))
-                return Tuple.Create(t + " is not contain", 0);
+            if (!StaCollection.ContainsKey(f) && StaCollection.ContainsKey(t))
+            {
+                var e = new InputStationException("起始站点" + f + "不存在！");
+                throw e;
+            }
+            if (!StaCollection.ContainsKey(t) && StaCollection.ContainsKey(f))
+            {
+                var e = new InputStationException("目标站点" + t + "不存在！");
+                throw e;
+            }
+            if (!StaCollection.ContainsKey(t) && !StaCollection.ContainsKey(f))
+            {
+                var e = new InputStationException("起始站点" + f + "和目标站点" + t + "都不存在！");
+                throw e;
+            }
             if (f.Equals(t))
-                return Tuple.Create("起点站与终点站相同", 0);
+            {
+                var e = new InputStationException("起始站点和目标站点相同！");
+                throw e;
+            }
+               
             int len = 0;
             int extralen = 1;
             Station from = StaCollection[f];
             Station to = StaCollection[t];
             string extrastring= "\n"+f;
-            
-            LinkedList<PathSection> path = new LinkedList<PathSection>();
-            /*if (isSameLine(from, to) != null)
+
+            //修改：加入保存同一条线路的代码，最后判断哪个更短，然后返回那个。
+
+            LinkedList<PathSection> SameLinePath = new LinkedList<PathSection>();
+            int SameLineLen = int.MaxValue;
+            if (isSameLine(from, to) != null)
             {
                 PathSection newsection = MakePathSection(from, to);
-                len = newsection.GetLen();
-                path.AddFirst(newsection);
-                return Tuple.Create(extrastring+HandlePath(path), len+extralen);
-            }*/
+                SameLineLen = newsection.GetLen();
+                SameLinePath.AddFirst(newsection);
+                //return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
+            }
+
+            LinkedList<PathSection> path = new LinkedList<PathSection>();
 
             int[] parents1 = new int[TransStaCount + 1];//The shortest distence between 0 and N  
             int[] parents2 = new int[TransStaCount + 1];
@@ -377,7 +444,7 @@ namespace WpfMetro
             Tuple<int, List<string>> FromTuple = FindNearestTransSta(from);
             Tuple<int, List<string>> ToTuple = FindNearestTransSta(to);
 
-            if(FromTuple.Item1==1)
+            if (FromTuple.Item1 == 1)
             {
                 FromNo1 = NameToNo[FromTuple.Item2.First()];
             }
@@ -396,90 +463,105 @@ namespace WpfMetro
                 ToNo2 = NameToNo[ToTuple.Item2.Last()];
             }
             int BigNum = int.MaxValue;
-            int len1=BigNum, len2=BigNum, len3=BigNum, len4=BigNum;
-            
-            if (NoToName[FromNo1]==f)
+            int len1 = BigNum, len2 = BigNum, len3 = BigNum, len4 = BigNum;
+
+            if (NoToName[FromNo1] == f)
             {
-                if(NoToName[ToNo1]==t)
+                if (NoToName[ToNo1] == t)
                 {
-                    len = DjistraLen(FromNo1, ToNo1, parents1);
+                    len = DijkstraLen(FromNo1, ToNo1, parents1);
                     path = BuildPath(parents1, FromNo1, ToNo1);
-                    return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                    if (len < SameLineLen)
+                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                    else
+                        return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                 }
                 else
                 {
-                    len1 = DjistraLen(FromNo1, ToNo1, parents1);
+                    len1 = DijkstraLen(FromNo1, ToNo1, parents1);
                     len1 += SectionLen(StaCollection[ToTuple.Item2.First()], to);
-                    if(ToTuple.Item1==2)
+                    if (ToTuple.Item1 == 2)
                     {
-                        len2 = DjistraLen(FromNo1, ToNo2, parents2);
+                        len2 = DijkstraLen(FromNo1, ToNo2, parents2);
                         len2 += SectionLen(StaCollection[ToTuple.Item2.Last()], to);
                     }
-                    if(len1<len2)
+                    if (len1 < len2)
                     {
                         len = len1;
                         path = BuildPath(parents1, FromNo1, ToNo1);
                         path.AddLast(MakePathSection(StaCollection[NoToName[ToNo1]], to));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                     else
                     {
                         len = len2;
                         path = BuildPath(parents2, FromNo1, ToNo2);
                         path.AddLast(MakePathSection(StaCollection[NoToName[ToNo2]], to));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                 }
             }
             else
             {
-                if (NoToName[ToNo1]==t)
+                if (NoToName[ToNo1] == t)
                 {
-                    len1 = DjistraLen(FromNo1, ToNo1, parents1);
+                    len1 = DijkstraLen(FromNo1, ToNo1, parents1);
                     len1 += SectionLen(from, StaCollection[NoToName[FromNo1]]);
-                    if(FromTuple.Item1==2)
+                    if (FromTuple.Item1 == 2)
                     {
-                        len2 = DjistraLen(FromNo2, ToNo1, parents2);
+                        len2 = DijkstraLen(FromNo2, ToNo1, parents2);
                         len2 += SectionLen(from, StaCollection[NoToName[FromNo2]]);
                     }
                     if (len1 < len2)
                     {
                         len = len1;
                         path = BuildPath(parents1, FromNo1, ToNo1);
-                        path.AddFirst(MakePathSection(from,StaCollection[NoToName[FromNo1]]));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        path.AddFirst(MakePathSection(from, StaCollection[NoToName[FromNo1]]));
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                     else
                     {
                         len = len2;
                         path = BuildPath(parents2, FromNo2, ToNo1);
                         path.AddFirst(MakePathSection(from, StaCollection[NoToName[FromNo2]]));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                 }
                 else
                 {
-                    if(FromNo1!=-1&&ToNo1!=-1)
+                    if (FromNo1 != -1 && ToNo1 != -1)
                     {
-                        len1 = DjistraLen(FromNo1, ToNo1, parents1);
+                        len1 = DijkstraLen(FromNo1, ToNo1, parents1);
                         len1 += SectionLen(from, StaCollection[NoToName[FromNo1]]);
                         len1 += SectionLen(StaCollection[NoToName[ToNo1]], to);
                     }
                     if (FromNo2 != -1 && ToNo1 != -1)
                     {
-                        len2 = DjistraLen(FromNo2, ToNo1, parents2);
+                        len2 = DijkstraLen(FromNo2, ToNo1, parents2);
                         len2 += SectionLen(from, StaCollection[NoToName[FromNo2]]);
                         len2 += SectionLen(StaCollection[NoToName[ToNo1]], to);
                     }
                     if (FromNo1 != -1 && ToNo2 != -1)
                     {
-                        len3 = DjistraLen(FromNo1, ToNo2, parents3);
+                        len3 = DijkstraLen(FromNo1, ToNo2, parents3);
                         len3 += SectionLen(from, StaCollection[NoToName[FromNo1]]);
                         len3 += SectionLen(StaCollection[NoToName[ToNo2]], to);
                     }
                     if (FromNo2 != -1 && ToNo2 != -1)
                     {
-                        len4 = DjistraLen(FromNo2, ToNo2, parents4);
+                        len4 = DijkstraLen(FromNo2, ToNo2, parents4);
                         len4 += SectionLen(from, StaCollection[NoToName[FromNo2]]);
                         len4 += SectionLen(StaCollection[NoToName[ToNo2]], to);
                     }
@@ -489,7 +571,10 @@ namespace WpfMetro
                         path = BuildPath(parents1, FromNo1, ToNo1);
                         path.AddFirst(MakePathSection(from, StaCollection[NoToName[FromNo1]]));
                         path.AddLast(MakePathSection(StaCollection[NoToName[ToNo1]], to));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                     else if (len2 <= len1 && len2 <= len3 && len2 <= len4)
                     {
@@ -497,7 +582,10 @@ namespace WpfMetro
                         path = BuildPath(parents2, FromNo2, ToNo1);
                         path.AddFirst(MakePathSection(from, StaCollection[NoToName[FromNo2]]));
                         path.AddLast(MakePathSection(StaCollection[NoToName[ToNo1]], to));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                     else if (len3 <= len2 && len3 <= len1 && len3 <= len4)
                     {
@@ -505,7 +593,10 @@ namespace WpfMetro
                         path = BuildPath(parents3, FromNo1, ToNo2);
                         path.AddFirst(MakePathSection(from, StaCollection[NoToName[FromNo1]]));
                         path.AddLast(MakePathSection(StaCollection[NoToName[ToNo2]], to));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                     else
                     {
@@ -513,13 +604,15 @@ namespace WpfMetro
                         path = BuildPath(parents4, FromNo2, ToNo2);
                         path.AddFirst(MakePathSection(from, StaCollection[NoToName[FromNo2]]));
                         path.AddLast(MakePathSection(StaCollection[NoToName[ToNo2]], to));
-                        return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        if (len < SameLineLen)
+                            return Tuple.Create(extrastring + HandlePath(path), len + extralen);
+                        else
+                            return Tuple.Create(extrastring + HandlePath(SameLinePath), SameLineLen + extralen);
                     }
                 }
-                return null;
             }
         }
-        public int DjistraLen(int fromno, int tono, int[] parents)
+        public int DijkstraLen(int fromno, int tono, int[] parents)
         {
             if (fromno == tono)
                 return 0;
@@ -560,15 +653,30 @@ namespace WpfMetro
             }
             return dist[tono];
         }
-        public Tuple<string, int> BFSPath(string f, string t)
+        public Tuple<string, int> BFSPath(string f, string t)//添加异常
         {
-            //验证站点存在
-            if (!StaCollection.ContainsKey(f))
-                return Tuple.Create(f + " is not contain", 0);
-            if (!StaCollection.ContainsKey(t))
-                return Tuple.Create(t + " is not contain", 0);
+            if (!StaCollection.ContainsKey(f) && StaCollection.ContainsKey(t))
+            {
+                var e = new InputStationException("起始站点" + f + "不存在！");
+                throw e;
+            }
+            if (!StaCollection.ContainsKey(t) && StaCollection.ContainsKey(f))
+            {
+                var e = new InputStationException("目标站点" + t + "不存在！");
+                throw e;
+            }
+            if (!StaCollection.ContainsKey(t) && !StaCollection.ContainsKey(f))
+            {
+                var e = new InputStationException("起始站点" + f + "和目标站点" + t + "都不存在！");
+                throw e;
+            }
             if (f.Equals(t))
-                return Tuple.Create("起点站与终点站相同", 0);
+            {
+                var e = new InputStationException("起始站点和目标站点相同！");
+                throw e;
+            }
+
+
             int extralen = 1;
             Station from = StaCollection[f];
             Station to = StaCollection[t];
@@ -891,7 +999,6 @@ namespace WpfMetro
             }
             return p;
         }
-        
         public int SectionLen(Station s1, Station s2)
         {
             PathSection p = MakePathSection(s1, s2);
@@ -1025,13 +1132,13 @@ namespace WpfMetro
             string f8 = "安河桥北";
             string f9 = "善各庄";
             string f10 = "车公庄";
-            Tuple<string, int> p = metrosys.DjistraPath(f1, f2);
-            Tuple<string, int> p1 = metrosys.DjistraPath(f2, f3);
-            Tuple<string, int> p2 = metrosys.DjistraPath(f4, f1);
-            Tuple<string, int> p3 = metrosys.DjistraPath(f3, f5);
-            Tuple<string, int> p4 = metrosys.DjistraPath(f5, f3);
-            Tuple<string, int> p5 = metrosys.DjistraPath(f1, f7);
-            Tuple<string, int> p6 = metrosys.DjistraPath(f3, f10);
+            Tuple<string, int> p = metrosys.DijkstraPath(f1, f2);
+            Tuple<string, int> p1 = metrosys.DijkstraPath(f2, f3);
+            Tuple<string, int> p2 = metrosys.DijkstraPath(f4, f1);
+            Tuple<string, int> p3 = metrosys.DijkstraPath(f3, f5);
+            Tuple<string, int> p4 = metrosys.DijkstraPath(f5, f3);
+            Tuple<string, int> p5 = metrosys.DijkstraPath(f1, f7);
+            Tuple<string, int> p6 = metrosys.DijkstraPath(f3, f10);
             //Tuple<string, int> p7 = metrosys.BFSPath(f1, f2);
             //Tuple<string, int> p8 = metrosys.BFSPath(f2, f3);
             //Tuple<string, int> p9 = metrosys.BFSPath(f4, f1);
@@ -1088,7 +1195,7 @@ namespace WpfMetro
                         System.Console.WriteLine(p1.Item1);
                         break;
                     case "-b":
-                        Tuple<string,int> p2 = metrosys.DjistraPath(f, t);
+                        Tuple<string,int> p2 = metrosys.DijkstraPath(f, t);
                         System.Console.Write(p2.Item2);
                         System.Console.WriteLine(p2.Item1);
                         break;
