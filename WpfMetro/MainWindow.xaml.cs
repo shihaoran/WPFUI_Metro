@@ -44,7 +44,7 @@ namespace WpfMetro
         System.Collections.ObjectModel.ObservableCollection<Member> memberData;
         BackgroundWorker bgWorker = new BackgroundWorker();
         string[] pathresult;
-        int speed = 0;
+        int speed = 2000;
 
 
         private void IMG1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -334,6 +334,7 @@ namespace WpfMetro
         {
             speed = (101 - (int)e.NewValue) * 20;
         }
+
     }
     public class Member
     {
