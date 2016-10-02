@@ -60,7 +60,7 @@
                              Text="请输入起点站" 
                              FontFamily="微软雅黑" 
                              VerticalAlignment="Top" 
-                             Width="130"/>
+                             Width="130" />
                     <TextBox x:Name="textBoxTo" 
                              HorizontalAlignment="Center" 
                              Controls:TextBoxHelper.ClearTextButton="True" 
@@ -139,7 +139,9 @@
                                            FontFamily="微软雅黑" 
                                            FontWeight="Bold" 
                                            Width="140" Height="70" 
-                                           Margin="27,341,27,244" 
+                                           Margin="27,341,0,0" 
+                                           VerticalAlignment="Top"
+                                           HorizontalAlignment="Left"
                                            Foreground="#FF065FB9" 
                                            ThumbIndicatorBrush="#FF065FB9"  />
                     <Label x:Name="label" 
@@ -147,6 +149,10 @@
                            FontFamily="微软雅黑" 
                            FontSize="17"
                            HorizontalAlignment="Left" Height="35" Margin="24,417,0,0" VerticalAlignment="Top" Width="134" Foreground="#FF065FB9"/>
+                    <Label x:Name="label2" Content="慢                     快" 
+                           FontFamily="微软雅黑" 
+                           FontSize="17"
+                           HorizontalAlignment="Left" Height="35" Margin="24,481,0,0" VerticalAlignment="Top" Width="150" Foreground="#FF065FB9"/>
                 </Grid>
             </TabItem>
             <TabItem Header="最短路径" Background="#CBF3FB">
@@ -155,9 +161,10 @@
                               AutoGenerateColumns="False"
                               Style="{StaticResource AzureDataGrid}" Height="Auto" >
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="ID" Width="50" Binding="{Binding ID}" Foreground="#FF065FB9"/>
-                            <DataGridTextColumn Header="站点名称" Width="80" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="ID" Width="35" Binding="{Binding ID}" Foreground="#FF065FB9"/>
+                            <DataGridTextColumn Header="站点名称" Width="70" Binding="{Binding Name}"/>
                             <DataGridCheckBoxColumn Header="换乘" Binding="{Binding isTrans}"/>
+                            <DataGridTextColumn Header="换乘线路" Width="70" Binding="{Binding TransLine}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <Button x:Name="buttonClear" Content="清空路线" FontFamily="微软雅黑" 

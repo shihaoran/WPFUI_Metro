@@ -31,6 +31,24 @@ namespace WpfMetro.Tests
         }
 
         [TestMethod()]
+        public void FindNearestTransStaTest()
+        {
+            Core core = new Core();
+            try
+            {
+                core.ReadData();
+            }
+            catch (MapErrorException e)
+            {
+                System.Console.WriteLine(e.Message);
+            }
+            Station s = core.StaCollection["2号航站楼"];
+            Tuple<int, List<string>> t = core.FindNearestTransSta(s);
+            Assert.AreEqual(1, t.Item1);
+        }
+
+
+        [TestMethod()]
         public void BuildGragphTest()
         {
             Core core = new Core();
@@ -49,7 +67,7 @@ namespace WpfMetro.Tests
         }
 
         [TestMethod()]
-        public void FindNearestTransStaTest()
+        public void FindNearestTransStaTest1()
         {
             Core core = new Core();
             try
