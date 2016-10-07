@@ -234,7 +234,6 @@ namespace WpfMetro
             try
             {
                 fs = new FileStream("beijing-subway.txt", FileMode.Open);
-                
             }
             catch (FileNotFoundException e)
             {
