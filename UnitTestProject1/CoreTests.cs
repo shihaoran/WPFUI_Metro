@@ -205,7 +205,6 @@ namespace WpfMetro.Tests
             Station b = null;
             Station c = null;
             Line l = null;
-            PathSection d = null;
 
             core.StaCollection.TryGetValue("西直门", out a);
             core.StaCollection.TryGetValue("北京站", out b);
@@ -242,10 +241,6 @@ namespace WpfMetro.Tests
             Core core = new Core();
             core.ReadData();
             Station a = null;
-            Station b = null;
-            Station c = null;
-            Line l = null;
-            PathSection d = null;
 
             core.StaCollection.TryGetValue("五道口", out a);
             List<Station> list = core.GetShortestLinkedStations(a);
