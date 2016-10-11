@@ -13,7 +13,7 @@ namespace WpfMetro
 
         int[,] Graph = new int[MAX_NODE,MAX_NODE];
         int[,] Cost = new int[MAX_NODE, MAX_NODE];
-        int V_dingdianshu, E_bianshu, Start_Point; // 顶点数和边数，以及开始的起点（以0开始）
+        int V_dingdianshu, Start_Point; // 顶点数和边数，以及开始的起点（以0开始）
 
         int []Odd_Grouping=new int[MAX_NODE]; // 为0表示不为奇，为1表示为奇，从2开始表示配对分组情况，如同为2的两个为一组，同为3的两个为一组，……
         int []Bak_Odd_Grouping=new int[MAX_NODE]; // 最好情况下分组策略的备份，因为可能还有其他情况更好，如果有，就更新此备份。
