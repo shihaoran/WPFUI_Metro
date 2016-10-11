@@ -22,7 +22,6 @@ namespace WpfMetro
         int []Dist=new int[MAX_NODE]; // Dijstra算法中，求从v0到v1最短路径结果，里面包含v0到最短路径上各点的最短权值
         int [,]ShortCache=new int[MAX_NODE,MAX_NODE]; // Dijstra算法中，求点v0到v1的最短路径记录值，当第一次求时，把结果存到本数组中，下次如果还在相同调用，则直接返回本数组中相应值。
         Dictionary<int, string> NoToName;
-        bool find = false;
         Core metrosys;
         // 数据输入，会用到Graph和Cost
         public ChinPost(Core p)
@@ -141,8 +140,6 @@ namespace WpfMetro
             LinkedList<int> for_test_nodes=new LinkedList<int>(); // 与新加入连通点连通的未加入点集
             int i, j;
             LinkedList<int> singlePoints=new LinkedList<int>(); // 图中的单点集
-            int test = 1;
-            int k = 0;
 
             // 先找出单点
             bool hasEdge = false;

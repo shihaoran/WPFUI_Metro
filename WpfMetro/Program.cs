@@ -234,7 +234,6 @@ namespace WpfMetro
             try
             {
                 fs = new FileStream("beijing-subway.txt", FileMode.Open);
-                
             }
             catch (FileNotFoundException e)
             {
@@ -1303,10 +1302,23 @@ namespace WpfMetro
             if (from.isTrans)
             {
                 startstano = NameToNo[f];
+                Tuple<int, List<string>> t = FindNearestTransSta(from);
+                Station Trans = StaCollection[t.Item2.First()];
+                if (from.isBoundary)
+                {
+                    foreach (string e in Trans.EndStas)
+                    {
+                        PathSection p1 = MakePathSection(from, StaCollection[e]);
+                        PathSection p2 = MakePathSection(StaCollection[e], from);
+                        count += p1.GetLen() + p2.GetLen();
+                        pathlist.AddLast(p1);
+                        pathlist.AddLast(p2);
+                    }
+                }
             }
             else
             {
-                Tuple<int,List<string>> t=FindNearestTransSta(from);
+                Tuple<int,List<string>> t = FindNearestTransSta(from);
                 //TODO 加入如果找到站点数量不等于1或者2的异常
                 if(t.Item1==1)//说明起点站在尽头路段上
                 {
@@ -1372,24 +1384,23 @@ namespace WpfMetro
             if(pathsection_out!=null)
                 pathlist.AddLast(pathsection_out);
             string path = HandlePath(pathlist);
-            path = "\n" + f + path;
-            return Tuple.Create(path, count+1);
+            return Tuple.Create(path, count);
         }
-        static void test()//原来命令行程序的读入读出模块，现已弃用
+        /*static void test()
         {
             Core metrosys = new Core();
             metrosys.ReadData();
             metrosys.BuildGragph("","","");
             //Console.Write(metrosys.MakePathSection(metrosys.StaCollection["巴沟"], metrosys.StaCollection["三元桥"]));
 
-            /*ChinPost cp = new ChinPost(metrosys);
+            ChinPost cp = new ChinPost(metrosys);
             cp.Initial(graph1, TransStaCount, 1);
             cp.OddDeal();
             cp.Fleury(1);
             Console.ReadLine();
             Station f = metrosys.StaCollection[args[1]];
             Station t = metrosys.StaCollection[args[2]];
-            */
+            
             string f1="沙河";
             string f2 = "南锣鼓巷";
             string f3 = "亦庄火车站";
@@ -1419,7 +1430,7 @@ namespace WpfMetro
             //System.Console.Write(q.Item2);
             //System.Console.Write(q.Item1);
             Console.ReadLine();
-            /*
+            
             if (args.Length == 1 && args[0].Equals("exit"))
             {
                 System.Console.WriteLine("程序结束");
@@ -1560,6 +1571,5 @@ namespace WpfMetro
                 }
             }
             */
-        }
     }
 }
